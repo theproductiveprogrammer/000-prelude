@@ -7,25 +7,31 @@
     welcome.png
 */
 /**
-*** This is the "prelude", where I
-*** create the blogging engine to
-*** publish my blogs. This probably
-*** won't interest you unless you
-*** want to create a similar blog
-*** so you should head out and
+*** This post is just the "prelude",
+*** where I create the blogging engine
+*** to publish my blogs. So this post
+*** won't interest you (unless you
+*** want to create a similar blog)
+*** Instead, you should head out and
 *** check [href=/](my later posts).
 */
 /**
-*** A fair question to ask is
-*** _why_ (as a so-called
+    bye.png [href=/]
+*/
+/**
+*** Still here? Ok then, let's dive
+*** in.
+*/
+/** A fair question to ask is
+*** just _why_ (as a so-called
 *** "productive programmer"),
 *** would I write a blogging
 *** engine rather than just
 *** use the dozens of options
 *** available -
 *** from the amazingly powerful
-*** WordPress to the light and
-*** speedy Jekyll.
+*** [href=https://wordpress.org/](WordPress) to the light and
+*** speedy [href=https://jekyllrb.com/](Jekyll).
 */
 /**
 *** It's just silly...isn't it?
@@ -59,7 +65,7 @@
 */
 
 /**
-    done.png
+    done.png [href=https://gitlab.com/productiveprogrammer/000-prelude/blob/master/prelude.go]
 */
 
 /** [...]
@@ -70,7 +76,10 @@ reading.
 It took a bit longer than expected
 but not too much and I'm quite
 happy with the way it turned
-out.
+out. What follows is the code
+itself that is part of this
+blog post and can be found
+in [href=https://gitlab.com/productiveprogrammer/000-prelude/blob/master/prelude.go](this file).
 */
 
 /**
