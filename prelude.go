@@ -789,10 +789,10 @@ const INDEX_TPL=`<!DOCTYPE html>
 .comment * { font-family: serif; max-width: 240px; }
 .comment div { margin: 5px 0; }
 .comment .author { font-weight: bold; white-space: pre-wrap; }
-@media (max-width: 767px) {
-.date,.title,.file,.content,.code,.mycomment,.comments { margin-left: 8px; margin-right: 8px; }
-}
 .post { display: block; margin: 0.5em 0; }
+@media (max-width: 767px) {
+.date,.toptitle,.title,.post,.home,.file,.content,.code,.mycomment,.comments { margin-left: 8px; margin-right: 8px; }
+}
     </style>
 
     <script src='https://www.google.com/recaptcha/api.js'></script>
