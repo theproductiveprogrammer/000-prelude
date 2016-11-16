@@ -905,7 +905,7 @@ div { margin: 3em 0; }
         <div class=title>{{.HTMLTitle}}/</div>
 
         <div class=file>
-            <a href={{urlquery .InPath}}>{{html (post_fname .)}}</a>
+            <a href={{gitlab_link .InPath}}>{{html (post_fname .)}}</a>
         </div>
 
         {{range .Content}}
@@ -937,6 +937,7 @@ func generate_blog_post(postinfo PostInfo) error {
         "post_date" : post_date,
         "post_fname" : post_fname,
         "contenttype_class" : contenttype_class,
+        "gitlab_link" : gitlab_link,
     }
 
     t,err := template.New("post.html").Funcs(fm).Parse(POST_TPL)
@@ -969,3 +970,10 @@ func contenttype_class(pc PostContent) string {
         return "empty"
     }
 }
+
+var GITLAB_PFX = "https://gitlab.com/productiveprogrammer/"
+func gitlab_link(path string) string {
+    paths := strings.Split(path, string(filepath.Separator))
+    return GITLAB_PFX + paths[len(paths)-2] + "/blob/master/" + paths[len(paths)-1]
+}
+
