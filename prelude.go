@@ -559,6 +559,7 @@ the content.
     [href=.](link text)
     https://www. youtube.com/watch?v=XXXXXX
     some_pic .png
+    some_pic .png [href=.]
     *bold*
     _italic_
     *_class1_*
@@ -634,6 +635,12 @@ func replace_markup(s string, postinfo PostInfo) string {
         return `<img class=pic src="` + tmp_url + `" alt="` + template.HTMLEscapeString(alt) + `"></img>`
     }
 
+    pic_link_replacer := func(s string, m[]int) string {
+        tmp_url := save_url(&saved_urls, s[m[4]:m[5]])
+        img := pic_replacer(s, m)
+        return `<a href="` + tmp_url + `">` + img + `</a>`
+    }
+
     bold_replacer := func(s string, m []int) string {
         return s[m[2]:m[3]] + `<b>` + s[m[4]:m[5]] + `</b>`
     }
@@ -649,8 +656,10 @@ func replace_markup(s string, postinfo PostInfo) string {
     }
 
     ft_maps := []from_to {
-        {from: `\[href=([^]]*)\]\(([^)]*)\)`,
+        {from: `\[href=([^]]+)\]\(([^)]+)\)`,
            to: link_replacer },
+        {from: LINE_MARKER + WHITESPACE + `*([^ ]*.png)` + WHITESPACE + `*\[href=([^]]+)\]`,
+           to: pic_link_replacer },
         {from: LINE_MARKER + WHITESPACE + `*https://www.youtube.com/watch\?v=([^ \t\n\r]*)` + WHITESPACE + `*`,
            to: youtube_replacer },
         {from: LINE_MARKER + WHITESPACE + `*([^ ]*.png)` + WHITESPACE + `*`,
