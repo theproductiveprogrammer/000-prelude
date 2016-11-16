@@ -1,0 +1,5 @@
+[database]
+username=tiger
+password=scott
+dbname=mydb
+

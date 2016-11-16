@@ -237,10 +237,10 @@ func set_post_info(pi []PostInfo) ([]PostInfo,error) {
 /*
 [=] Return the output path
 for the post.
-[ ] The is the filename + ".html"
+[ ] The is the filename + ".php"
 */
 func get_outpath(postinfo PostInfo) (string,error) {
-    return filepath.Base(postinfo.InPath) + ".html" ,nil
+    return filepath.Base(postinfo.InPath) + ".php" ,nil
 }
 
 /*
@@ -901,6 +901,7 @@ div { margin: 3em 0; }
 @media (max-width: 767px) {
 .date,.title,.file,.content,.code,.mycomment,.comments { margin-left: 8px; margin-right: 8px; }
 }
+#submit_comment { font-size: 1.2em; }
     </style>
     <style>
 .class1 { color: red; }
@@ -934,16 +935,116 @@ div { margin: 3em 0; }
   .  .  .  .  .  .  .  .  .  .  
         </div>
 
-        <form class=mycomment>
-            <textarea cols=24 rows=8></textarea>
+        <script>
+function enable_submit() {
+    document.getElementById('submit_comment').disabled = false;
+}
+        </script>
+        <form class=mycomment method=POST>
+            <input type=hidden name=comment_on value="{{urlquery .OutPath}}">
+            <textarea name=comment cols=24 rows=8></textarea><br/>
             <input type=text placeholder="Email(optional)" name=email id=email>
-            <div class="g-recaptcha" data-sitekey="6LeVxgsUAAAAACGmyQCmlk4KJDHn8oCcQvSG-45H"></div>
-            <input type=submit value="My Comments">
+            <div class="g-recaptcha" data-callback="enable_submit" data-sitekey="6LeVxgsUAAAAACGmyQCmlk4KJDHn8oCcQvSG-45H"></div>
+            <input id=submit_comment disabled=disabled type=submit value="Submit My Comment">
         </form>
 
         <div class=sep>
   .  .  .  .  .  .  .  .  .  .  
         </div>
+
+<?php
+$root = $_SERVER['DOCUMENT_ROOT'];
+$config = parse_ini_file($root . '/../php-mysql-config.ini');
+$conn = mysqli_connect('localhost', $config['username'], $config['password'], $config['dbname']);
+if(! $conn ) {
+    die('Could not connect: ' . mysqli_connect_error());
+}
+
+if (isset($_POST['comment']) && !empty($_POST['comment'])) {
+
+    if(isset($_POST['g-recaptcha-response']) && !empty($_POST['g-recaptcha-response'])) {
+
+        $secret = "6LeVxgsUAAAAAI5E4n84Lp60ojgBPw0U7AX6aIZV";
+        $recaptcha = $_POST['g-recaptcha-response'];
+
+        $url = 'https://www.google.com/recaptcha/api/siteverify';
+        $data = 'secret=' . $secret . '&response=' . $recaptcha;
+
+        $ch = curl_init( $url );
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt( $ch, CURLOPT_POST, 1);
+        curl_setopt( $ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt( $ch, CURLOPT_HEADER, 0);
+        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1);
+
+        $verifyResponse = curl_exec( $ch );
+
+        $responseData = json_decode($verifyResponse);
+        if ($responseData->success) {
+
+            $comment_on = mysqli_real_escape_string($conn, $_POST['comment_on']);
+            $comment = mysqli_real_escape_string($conn, $_POST['comment']);
+            $email = mysqli_real_escape_string($conn, $_POST['email']);
+
+            $addr   = mysqli_real_escape_string($conn, $_SERVER['REMOTE_ADDR']);
+            $port   = mysqli_real_escape_string($conn, $_SERVER['REMOTE_PORT']);
+            $method = mysqli_real_escape_string($conn, $_SERVER['REQUEST_METHOD']);
+            $url    = mysqli_real_escape_string($conn, $_SERVER['REQUEST_URI']);
+
+            $client_ip       = isset($_SERVER['HTTP_CLIENT_IP'])       ? mysqli_real_escape_string($conn, $_SERVER['HTTP_CLIENT_IP']) : '';
+            $x_forwarded_for = isset($_SERVER['HTTP_X_FORWARDED_FOR']) ? mysqli_real_escape_string($conn, $_SERVER['HTTP_X_FORWARDED_FOR']) : '';
+            $ua              = isset($_SERVER['HTTP_USER_AGENT'])      ? mysqli_real_escape_string($conn, $_SERVER['HTTP_USER_AGENT']) : '';
+            $referer         = isset($_SERVER['HTTP_REFERER'])         ? mysqli_real_escape_string($conn, $_SERVER['HTTP_REFERER']) : '';
+            $sz              = isset($_SERVER['CONTENT_LENGTH'])       ? mysqli_real_escape_string($conn, $_SERVER['CONTENT_LENGTH']) : '';
+
+            $sql = "insert into comments (comment_on,comment,email,at,addr,client_ip,x_forwarded_for,port,ua,referer) VALUES('$comment_on','$comment','$email',NOW(),'$addr','$client_ip','$x_forwarded_for','$port','$ua','$referer')";
+
+            $retval = mysqli_query($conn, $sql);
+            if (!$retval) {
+                error_log(mysqli_error($conn));
+                mysqli_close($conn);
+                die("Uh...oh! Something went wrong!");
+            }
+
+        }
+    }
+
+}
+
+$sql = "select * from comments where comment_on='{{urlquery .OutPath}}' order by 'at' desc";
+$result = mysqli_query($conn, $sql);
+if(mysqli_num_rows($result) > 0) {
+?>
+        <div class=comments>
+<?php
+    while($row = mysqli_fetch_assoc($result)) {
+        $email = htmlspecialchars($row['email']);
+        if (!empty($email) && strpos($email, '@')) {
+            $author = substr($email, 0, strpos($email, '@'));
+        } else {
+            $author = "Someone";
+        }
+        $comment = htmlspecialchars($row['comment']);
+        echo "<div class=comment>";
+        echo "<div><span class=author>" . $author . "</span> says:</div>";
+        echo "<div class=txt>" . $comment . "</div>";
+        echo "</div>";
+    }
+?>
+        </div>
+
+        <div class=sep>
+  .  .  .  .  .  .  .  .  .  .  
+        </div>
+<?php
+
+}
+
+mysqli_close($conn);
+?>
+
+
 
     </div>
 
