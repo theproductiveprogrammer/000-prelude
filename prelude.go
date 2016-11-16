@@ -655,11 +655,11 @@ func replace_markup(s string, postinfo PostInfo) string {
            to: youtube_replacer },
         {from: LINE_MARKER + WHITESPACE + `*([^ ]*.png)` + WHITESPACE + `*`,
            to: pic_replacer },
-        {from: `(` + WHITESPACE + `)\*([A-Za-z0-9].*?)\*`,
+        {from: `([ \t\n\r])\*([A-Za-z0-9].*?)\*`,
            to: bold_replacer },
-        {from: `(` + WHITESPACE + `)_([A-Za-z0-9].*?)_`,
+        {from: `([ \t\n\r])_([A-Za-z0-9].*?)_`,
            to: italic_replacer },
-        {from: `(` + WHITESPACE + `)\*([_]+)([A-Za-z0-9].*?)[_]+\*`,
+        {from: `([ \t\n\r])\*([_]+)([A-Za-z0-9].*?)[_]+\*`,
            to: class_replacer },
     }
 
