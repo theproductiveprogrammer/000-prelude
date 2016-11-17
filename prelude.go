@@ -77,14 +77,14 @@ It took a bit longer than expected
 but not too much and I'm quite
 happy with the way it turned
 out. What follows is the code
-itself that is part of this
-blog post and can be found
-in [href=https://gitlab.com/productiveprogrammer/000-prelude/blob/master/prelude.go](this file).
+that *_eats itself_* (_yum_!) to
+create this lovely page and can
+be found in [href=https://gitlab.com/productiveprogrammer/000-prelude/blob/master/prelude.go](this file).
 */
 
 /**
 [=] So what do we have to do?
-We'll take an input file with
+We'll take a config file with
 paths to the blog posts and use
 it to:
 (a) Generate a first/index page
@@ -506,8 +506,10 @@ markup-like text I would like to use:
     [href=.](link text)
     https://www. youtube.com/watch?v=XXXXXX
     some_pic .png
+    some_pic .png [href=.]
     *bold*
     _italic_
+    _*bold-italic*_
     *_class1_*
     *__class2__*
     *___class3___*
@@ -571,6 +573,7 @@ the content.
     some_pic .png [href=.]
     *bold*
     _italic_
+    _*bold-italic*_
     *_class1_*
     *__class2__*
     *___class3___*
@@ -650,6 +653,10 @@ func replace_markup(s string, postinfo PostInfo) string {
         return `<a href="` + tmp_url + `">` + img + `</a>`
     }
 
+    bold_italic_replacer := func(s string, m []int) string {
+        return s[m[2]:m[3]] + `<i><b>` + s[m[4]:m[5]] + `</b></i>`
+    }
+
     bold_replacer := func(s string, m []int) string {
         return s[m[2]:m[3]] + `<b>` + s[m[4]:m[5]] + `</b>`
     }
@@ -673,11 +680,13 @@ func replace_markup(s string, postinfo PostInfo) string {
            to: youtube_replacer },
         {from: LINE_MARKER + WHITESPACE + `*([^ ]*.png)` + WHITESPACE + `*`,
            to: pic_replacer },
-        {from: `([ \t\n\r])\*([A-Za-z0-9].*?)\*`,
+        {from: `([ \t\n\r(])_\*([A-Za-z0-9].*?)\*_`,
+           to: bold_italic_replacer },
+        {from: `([ \t\n\r(])\*([A-Za-z0-9].*?)\*`,
            to: bold_replacer },
-        {from: `([ \t\n\r])_([A-Za-z0-9].*?)_`,
+        {from: `([ \t\n\r(])_([A-Za-z0-9].*?)_`,
            to: italic_replacer },
-        {from: `([ \t\n\r])\*([_]+)([A-Za-z0-9].*?)[_]+\*`,
+        {from: `([ \t\n\r(])\*([_]+)([A-Za-z0-9].*?)[_]+\*`,
            to: class_replacer },
     }
 
@@ -734,9 +743,13 @@ func get_comment_marker(postinfo PostInfo) (post_comment_marker,error) {
     return markers,nil
 }
 
-/*
-[=] Generate the list of blogs
-in a new index.html file.
+/**
+[=] Generate the main page -
+a list of blogs in a new
+index.html file.
+[ ] We use the small (and
+quite lovely) [href=https://golang.org/pkg/text/template/](go template)
+engine to create this.
 */
 const INDEX_TPL=`<!DOCTYPE html>
 <html>
@@ -835,8 +848,12 @@ func generate_blog_index(pi []PostInfo) error {
     return t.Execute(i, pi)
 }
 
-/*
+/**
 [=] Generate all blog posts
+[ ] We use [href=https://golang.org/pkg/text/template/](go templates)
+[ ] We generate [href=http://php.net/manual/en/intro-whatis.php](php) files
+so that we can dynamically
+render comments.
 */
 func generate_blog_posts(pi []PostInfo) {
     for _,postinfo := range pi {
