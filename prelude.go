@@ -152,6 +152,9 @@ type PostInfo struct {
     On      time.Time
     Content []PostContent
 
+    AssetDir string
+    AddlCss  []string
+
     pcm     post_comment_marker
 
     OutPath string
@@ -161,9 +164,12 @@ type PostInfo struct {
 /**
 * [...]
 * The config file simply
-* contains / the list of paths
-* to each blog post
-*     posts/timemgmt/timemgmt.c
+* contains the list of paths
+* to each blog post and
+* an optional path for
+* the blog's assets (images
+* & css).
+*     posts/timemgmt/timemgmt.c, tm-assets
 *     posts/learn-angular/angularstart.htm
 *     ...
 */
@@ -181,10 +187,48 @@ func load_config() ([]PostInfo,error) {
     for _,line := range lines {
         line = strings.TrimSpace(line)
         if len(line) > 0 {
-            r = append(r, PostInfo{ InPath: filepath.Clean(line) })
+            r = append(r, cfg_2_postinfo(line))
         }
     }
     return r,nil
+}
+
+/**
+[=] Create a PostInfo from the
+given configuration line. This
+has one of two formats:
+
+  (a) just/a/blog/post.c
+  (b) a/blog/post.c, with-assets/
+
+If assets are provided, we look
+for additional files and add
+them as well.
+[ ] Try and split the line on
+a comma.
+[ ] If we can't just set the
+InPath and we're done
+[ ] If we can, make sure we
+only have two splits - the
+blog path and the asset dir.
+[ ] Walk the asset directory and
+look for additional files
+*/
+func cfg_2_postinfo(cfg_line string) PostInfo {
+    s := strings.Split(cfg_line, ",")
+    if len(s) == 1 {
+        return PostInfo{ InPath: filepath.Clean(strings.TrimSpace(cfg_line)) }
+    }
+    if len(s) > 2 {
+        s = []string{ strings.Join(s[:len(s)-1], ","), s[len(s)-1] }
+    }
+    r := PostInfo { InPath: filepath.Clean(strings.TrimSpace(s[0])),
+                    AssetDir: filepath.Clean(strings.TrimSpace(s[1])) }
+    paths,err := filepath.Glob(filepath.Join(r.AssetDir, "*.css"))
+    if err == nil {
+        r.AddlCss = paths
+    }
+    return r
 }
 
 /*[=] Get the config file from
@@ -641,9 +685,10 @@ func replace_markup(s string, postinfo PostInfo) string {
     pic_replacer := func(s string, m []int) string {
         url := html.UnescapeString(s[m[2]:m[3]])
         imgsrc := filepath.Join(filepath.Dir(postinfo.InPath), url)
-        fmt.Println("cp '" + imgsrc + "' .")
+        imgdst := filepath.Join(postinfo.AssetDir, url)
+        fmt.Println("cp '" + imgsrc + "' '" + imgdst + "'")
         alt := fname_to_title(url)
-        tmp_url := save_url(&saved_urls, url)
+        tmp_url := save_url(&saved_urls, imgdst)
         return `<img class=pic src="` + tmp_url + `" alt="` + template.HTMLEscapeString(alt) + `"></img>`
     }
 
@@ -920,11 +965,11 @@ div { margin: 3em 0; }
 }
 #submit_comment { font-size: 1.2em; }
     </style>
-    <style>
-.class1 { color: red; }
-.class2 { color: green; }
-.class3 { color: blue; }
-    </style>
+
+    {{range .AddlCss}}
+    <link rel=stylesheet href="{{.}}"></link>
+    {{end}}
+
 
     <script src='https://www.google.com/recaptcha/api.js'></script>
 
