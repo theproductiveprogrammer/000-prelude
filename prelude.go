@@ -1164,9 +1164,25 @@ func contenttype_class(pc PostContent) string {
     }
 }
 
+/**
+[=] Return the link to gitlab.
+[+] We're going for a
+quick-and-dirty solution.
+[+] Rather than trying to find
+the git path we assume that it
+is in our post/<repo> path.
+[ ] Split the path
+[ ] The second component
+is the repository.
+[ ] The remaining components
+is the path needed.
+[ ] Create the gitlab link
+*/
 var GITLAB_PFX = "https://gitlab.com/productiveprogrammer/"
 func gitlab_link(path string) string {
     paths := strings.Split(path, string(filepath.Separator))
-    return GITLAB_PFX + paths[len(paths)-2] + "/blob/master/" + paths[len(paths)-1]
+    repo := paths[1]
+    path = strings.Join(paths[2:], string(filepath.Separator))
+    return GITLAB_PFX + repo + "/blob/master/" + path
 }
 
