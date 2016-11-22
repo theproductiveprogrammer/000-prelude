@@ -1020,7 +1020,7 @@ function enable_submit() {
             <input type=hidden name=comment_on value="{{urlquery .OutPath}}">
             <textarea name=comment cols=24 rows=8></textarea><br/>
             <input type=text placeholder="Email(optional)" name=email id=email>
-            <div class="g-recaptcha" data-callback="enable_submit" data-sitekey="6LeVxgsUAAAAACGmyQCmlk4KJDHn8oCcQvSG-45H"></div>
+            <div class="g-recaptcha" data-callback="enable_submit" data-sitekey="6LcCqQwUAAAAAJK_PChDBP28CGsOPlCZ1xkR44hB"></div>
             <input id=submit_comment disabled=disabled type=submit value="Submit My Comment">
         </form>
 
@@ -1040,7 +1040,7 @@ if (isset($_POST['comment']) && !empty($_POST['comment'])) {
 
     if(isset($_POST['g-recaptcha-response']) && !empty($_POST['g-recaptcha-response'])) {
 
-        $secret = "6LeVxgsUAAAAAI5E4n84Lp60ojgBPw0U7AX6aIZV";
+        $secret = "6LcCqQwUAAAAAG_Cdcmk_BeSCCttVIpelXCzN6QJ";
         $recaptcha = $_POST['g-recaptcha-response'];
 
         $url = 'https://www.google.com/recaptcha/api/siteverify';
