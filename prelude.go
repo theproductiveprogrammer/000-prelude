@@ -344,14 +344,24 @@ modification time as a fallback.
 func get_post_date(postinfo PostInfo) (time.Time,error) {
     var t time.Time
 
-    out,err := exec.Command("git", "log", "-n1", "--format=%ad", "--date=short", "--", postinfo.InPath).Output()
-    date := strings.TrimSpace(string(out))
-    if err == nil && len(date) > 0 {
-        t,err = time.Parse("2006-01-02", date)
-        if err != nil {
-            return t, errors.New("Failed to parse git date: " + date)
+    filedir := filepath.Dir(postinfo.InPath)
+    currdir,err := os.Getwd()
+    if err == nil {
+        err := os.Chdir(filedir)
+        if err == nil {
+            fname := filepath.Base(postinfo.InPath)
+            out,err := exec.Command("git", "log", "--reverse", "--format=%ad", "--date=short", "--", fname).Output()
+            os.Chdir(currdir)
+            dates := strings.Split(string(out), "\n")
+            date := strings.TrimSpace(dates[0])
+            if err == nil && len(date) > 0 {
+                t,err = time.Parse("2006-01-02", date)
+                if err != nil {
+                    return t, errors.New("Failed to parse git date: " + date)
+                }
+                return t,nil
+            }
         }
-        return t,nil
     }
 
     var fi os.FileInfo
@@ -599,7 +609,7 @@ which we need to clean up
 */
 func clean_post_content(pc PostContent, decorater rune) string {
 
-    rx := regexp.MustCompile(LINE_MARKER + regexp.QuoteMeta(string(decorater)) + "+" + WHITESPACE + "?")
+    rx := regexp.MustCompile(LINE_MARKER + WHITESPACE + "*" + regexp.QuoteMeta(string(decorater)) + "+" + WHITESPACE + "?")
 
     if pc.Typ == POSTCOMMENT {
         return rx.ReplaceAllString(pc.HTMLVal, "\n")
@@ -950,6 +960,7 @@ div { margin: 3em 0; }
 .home { margin: 0 10%; float: right; }
 .home img { max-width: 64px; }
 .date { margin: 0; }
+.date a { text-decoration: none; color: black; }
 .title { font-weight: bold; margin: 0.67em 0; }
 .file { margin: 0.67em 0 3em 0; }
 .content { white-space: pre-wrap; }
@@ -982,12 +993,12 @@ div { margin: 3em 0; }
 
     <div class=main-content>
 
-        <div class=date>{{html (post_date .)}}</div>
+        <div class=date><a href=/>{{html (post_date .)}}</a></div>
 
-        <div class=title>{{.HTMLTitle}}/</div>
+        <div class=title>{{.HTMLTitle}}</div>
 
         <div class=file>
-            <a href={{gitlab_link .InPath}}>{{html (post_fname .)}}</a>
+            src/<a href={{gitlab_link .InPath}}>{{html (post_fname .)}}</a>
         </div>
 
         {{range .Content}}
@@ -1137,10 +1148,10 @@ func generate_blog_post(postinfo PostInfo) error {
 }
 
 func post_date(postinfo PostInfo) string {
-    return postinfo.On.Format("Jan 01")
+    return postinfo.On.Format("Jan 02")
 }
 func post_fname(postinfo PostInfo) string {
-    return filepath.Base(postinfo.OutPath)
+    return filepath.Base(postinfo.InPath)
 }
 
 func contenttype_class(pc PostContent) string {
