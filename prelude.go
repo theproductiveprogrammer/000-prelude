@@ -778,6 +778,7 @@ configuration file.
 func get_comment_marker(postinfo PostInfo) (post_comment_marker,error) {
     m := map[string]post_comment_marker {
         ".go": { start: "/**", decorate: '*', end: "*/" },
+        ".swift": { start: "/**", decorate: '*', end: "*/" },
     }
 
     ext := filepath.Ext(postinfo.InPath)
