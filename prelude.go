@@ -733,6 +733,8 @@ func replace_markup(s string, postinfo PostInfo) string {
            to: pic_link_replacer },
         {from: LINE_MARKER + WHITESPACE + `*https://www.youtube.com/watch\?v=([^ \t\n\r]*)` + WHITESPACE + `*`,
            to: youtube_replacer },
+        {from: LINE_MARKER + WHITESPACE + `*https://youtu.be/([^ \t\n\r]*)` + WHITESPACE + `*`,
+           to: youtube_replacer },
         {from: LINE_MARKER + WHITESPACE + `*([^ ]*.png)` + WHITESPACE + `*`,
            to: pic_replacer },
         {from: `([ \t\n\r(])_\*([A-Za-z0-9].*?)\*_`,
