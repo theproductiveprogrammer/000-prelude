@@ -65,7 +65,7 @@
 */
 
 /**
-    done.png [href=https://gitlab.com/productiveprogrammer/000-prelude/blob/master/prelude.go]
+    done.png [href=https://github.com/productiveprogrammer/000-prelude/blob/master/prelude.go]
 */
 
 /** [...]
@@ -79,7 +79,7 @@ happy with the way it turned
 out. What follows is the code
 that *_eats itself_* (_yum_!) to
 create this lovely page and can
-be found in [href=https://gitlab.com/productiveprogrammer/000-prelude/blob/master/prelude.go](this file).
+be found in [href=https://github.com/productiveprogrammer/000-prelude/blob/master/prelude.go](this file).
 */
 
 /**
@@ -1011,7 +1011,7 @@ div { margin: 3em 0; }
         <div class=title>{{.HTMLTitle}}</div>
 
         <div class=file>
-            src/<a href={{gitlab_link .InPath}}>{{html (post_fname .)}}</a>
+            src/<a href={{github_link .InPath}}>{{html (post_fname .)}}</a>
         </div>
 
         {{range .Content}}
@@ -1155,6 +1155,7 @@ func generate_blog_post(postinfo PostInfo) error {
         "post_fname" : post_fname,
         "contenttype_class" : contenttype_class,
         "gitlab_link" : gitlab_link,
+        "github_link" : github_link,
     }
 
     t,err := template.New("post.html").Funcs(fm).Parse(POST_TPL)
@@ -1188,7 +1189,7 @@ func contenttype_class(pc PostContent) string {
     }
 }
 
-/**
+/*
 [=] Return the link to gitlab.
 [+] We're going for a
 quick-and-dirty solution.
@@ -1208,5 +1209,27 @@ func gitlab_link(path string) string {
     repo := paths[1]
     path = strings.Join(paths[2:], string(filepath.Separator))
     return GITLAB_PFX + repo + "/blob/master/" + path
+}
+
+/*
+[=] Return the link to github.
+[+] We're going for a
+quick-and-dirty solution.
+[+] Rather than trying to find
+the git path we assume that it
+is in our post/<repo> path.
+[ ] Split the path
+[ ] The second component
+is the repository.
+[ ] The remaining components
+is the path needed.
+[ ] Create the github link
+*/
+var GITHUB_PFX = "https://github.com/theproductiveprogrammer/"
+func github_link(path string) string {
+    paths := strings.Split(path, string(filepath.Separator))
+    repo := paths[1]
+    path = strings.Join(paths[2:], string(filepath.Separator))
+    return GITHUB_PFX + repo + "/blob/master/" + path
 }
 
