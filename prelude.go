@@ -979,7 +979,9 @@ div { margin: 3em 0; }
 .content { white-space: pre-wrap; }
 .code { white-space: pre; font-size: 75%; color: #999; }
 .sep { white-space: pre; }
-.mycomment input { font: serif; font-size:95%; display: block; }
+.notify_me { font: serif; font-size: 95%; font-style: italic; }
+.mycomment input { margin: 5px 0; font: serif; font-size:95%; display: block; }
+.mycomment input[type=checkbox] { display: inline; }
 .mycomment div { margin: 5px 0; }
 .comment { max-width: 240px; }
 .comment * { font-family: serif; max-width: 240px; }
@@ -1029,10 +1031,11 @@ function enable_submit() {
         </script>
         <form class=mycomment method=POST>
             <input type=hidden name=comment_on value="{{urlquery .OutPath}}">
-            <textarea name=comment cols=24 rows=8></textarea><br/>
-            <input type=text placeholder="Email(optional)" name=email id=email>
+            <input type=checkbox name=notify_me value=notify> <span class=notify_me>Notify me on new blog posts</span>
+            <input type=text placeholder="Email(never shared)" name=email id=email>
+            <textarea placeholder="Comment" name=comment cols=24 rows=8></textarea><br/>
             <div class="g-recaptcha" data-callback="enable_submit" data-sitekey="6LcCqQwUAAAAAJK_PChDBP28CGsOPlCZ1xkR44hB"></div>
-            <input id=submit_comment disabled=disabled type=submit value="Submit My Comment">
+            <input id=submit_comment disabled=disabled type=submit value="Submit">
         </form>
 
         <div class=sep>
@@ -1047,7 +1050,7 @@ if(! $conn ) {
     die('Could not connect: ' . mysqli_connect_error());
 }
 
-if (isset($_POST['comment']) && !empty($_POST['comment'])) {
+if ((isset($_POST['comment']) && !empty($_POST['comment'])) || ((isset($_POST['email']) && !empty($_POST['email'])))) {
 
     if(isset($_POST['g-recaptcha-response']) && !empty($_POST['g-recaptcha-response'])) {
 
@@ -1070,6 +1073,12 @@ if (isset($_POST['comment']) && !empty($_POST['comment'])) {
         $responseData = json_decode($verifyResponse);
         if ($responseData->success) {
 
+            $notify_me = mysqli_real_escape_string($conn, $_POST['notify_me']);
+            if ($notify_me == "notify") {
+                $inlist = 1;
+            } else {
+                $inlist = 0;
+            }
             $comment_on = mysqli_real_escape_string($conn, $_POST['comment_on']);
             $comment = mysqli_real_escape_string($conn, $_POST['comment']);
             $email = mysqli_real_escape_string($conn, $_POST['email']);
@@ -1085,7 +1094,7 @@ if (isset($_POST['comment']) && !empty($_POST['comment'])) {
             $referer         = isset($_SERVER['HTTP_REFERER'])         ? mysqli_real_escape_string($conn, $_SERVER['HTTP_REFERER']) : '';
             $sz              = isset($_SERVER['CONTENT_LENGTH'])       ? mysqli_real_escape_string($conn, $_SERVER['CONTENT_LENGTH']) : '';
 
-            $sql = "insert into comments (comment_on,comment,email,at,addr,client_ip,x_forwarded_for,port,ua,referer) VALUES('$comment_on','$comment','$email',NOW(),'$addr','$client_ip','$x_forwarded_for','$port','$ua','$referer')";
+            $sql = "insert into comments (inlist,live,confirmed,comment_on,comment,email,at,addr,client_ip,x_forwarded_for,port,ua,referer) VALUES('$inlist','1','0','$comment_on','$comment','$email',NOW(),'$addr','$client_ip','$x_forwarded_for','$port','$ua','$referer')";
 
             $retval = mysqli_query($conn, $sql);
             if (!$retval) {
@@ -1096,10 +1105,9 @@ if (isset($_POST['comment']) && !empty($_POST['comment'])) {
 
         }
     }
-
 }
 
-$sql = "select * from comments where comment_on='{{urlquery .OutPath}}' order by 'at' desc";
+$sql = "select * from comments where TRIM(IFNULL(comment, '')) > '' and comment_on='{{urlquery .OutPath}}' and live=1 order by 'at' desc";
 $result = mysqli_query($conn, $sql);
 if(mysqli_num_rows($result) > 0) {
 ?>

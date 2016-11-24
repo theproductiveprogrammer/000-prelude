@@ -1,8 +1,11 @@
 CREATE TABLE comments (
     `comment_id` int NOT NULL AUTO_INCREMENT,
     `comment_on` varchar(64) NOT NULL,
-    `comment` varchar(1028) NOT NULL,
+    `comment` varchar(1028),
     `email` varchar(128),
+    `inlist` tinyint,
+    `confirmed` tinyint,
+    `live` tinyint,
     `at` datetime NOT NULL,
     `addr` varchar(64) DEFAULT NULL,
     `client_ip` varchar(64) DEFAULT NULL,
