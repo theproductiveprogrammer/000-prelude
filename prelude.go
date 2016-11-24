@@ -65,7 +65,7 @@
 */
 
 /**
-    done.png [href=https://github.com/productiveprogrammer/000-prelude/blob/master/prelude.go]
+    done.png [href=https://github.com/theproductiveprogrammer/000-prelude/blob/master/prelude.go]
 */
 
 /** [...]
@@ -79,7 +79,7 @@ happy with the way it turned
 out. What follows is the code
 that *_eats itself_* (_yum_!) to
 create this lovely page and can
-be found in [href=https://github.com/productiveprogrammer/000-prelude/blob/master/prelude.go](this file).
+be found in [href=https://github.com/theproductiveprogrammer/000-prelude/blob/master/prelude.go](this file).
 */
 
 /**
