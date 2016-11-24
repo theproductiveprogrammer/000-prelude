@@ -847,6 +847,7 @@ const INDEX_TPL=`<!DOCTYPE html>
 .main-content { margin-top: 0; }
 .home { margin-bottom: 3em; }
 .home img { max-width: 64px; text-align: right; }
+.msg { white-space: pre-wrap; }
 .date { margin: 0; }
 .toptitle { margin: 5px 0; }
 .title { font-weight: bold; margin: 1.67em 0 0.67em 0; }
@@ -876,6 +877,14 @@ const INDEX_TPL=`<!DOCTYPE html>
 
         <div class=home>
             <a href=/><img src=prodprog-bw.png alt='logo'></img></a>
+        </div>
+
+        <div class=msg>
+    In this blog, I want to help
+      programmers like myself be
+productive, get wonderful things
+  done, and make the best use of
+            our time and effort.
         </div>
 
         <div class=title>Posts</div>
@@ -974,12 +983,13 @@ div { margin: 3em 0; }
 .home img { max-width: 64px; }
 .date { margin: 0; }
 .date a { text-decoration: none; color: black; }
+.back, .back a { text-decoration: none; color: black; }
 .title { font-weight: bold; margin: 0.67em 0; }
 .file { margin: 0.67em 0 3em 0; }
 .content { white-space: pre-wrap; }
 .code { white-space: pre; font-size: 75%; color: #999; }
 .sep { white-space: pre; }
-.notify_me { font: serif; font-size: 95%; font-style: italic; }
+.footer,.notify_me { font: serif; font-size: 95%; font-style: italic; }
 .mycomment input { margin: 5px 0; font: serif; font-size:95%; display: block; }
 .mycomment input[type=checkbox] { display: inline; }
 .mycomment div { margin: 5px 0; }
@@ -988,9 +998,10 @@ div { margin: 3em 0; }
 .comment div { margin: 5px 0; }
 .comment .author { font-weight: bold; white-space: pre-wrap; }
 @media (max-width: 767px) {
-.date,.title,.file,.content,.code,.mycomment,.comments { margin-left: 8px; margin-right: 8px; }
+.date,.title,.file,.content,.code,.mycomment,.comments,.footer { margin-left: 8px; margin-right: 8px; }
 }
 #submit_comment { font-size: 1.2em; }
+.back,.copyright,.srcfile { margin: 0; }
     </style>
 
     {{range .AddlCss}}
@@ -1013,7 +1024,8 @@ div { margin: 3em 0; }
         <div class=title>{{.HTMLTitle}}</div>
 
         <div class=file>
-            src/<a href={{github_link .InPath}}>{{html (post_fname .)}}</a>
+            <div class=back><a href=/>../</a></div>
+            <div class=srcfile>src/<a href={{github_link .InPath}}>{{html (post_fname .)}}</a></div>
         </div>
 
         {{range .Content}}
@@ -1132,12 +1144,18 @@ if(mysqli_num_rows($result) > 0) {
         <div class=sep>
   .  .  .  .  .  .  .  .  .  .  
         </div>
+
 <?php
 
 }
 
 mysqli_close($conn);
 ?>
+
+        <div class=footer>
+<div class=back><a href=/>../</a></div>
+<div class=copyright>Copyright &copy; <?php echo date("Y"); ?> @productiveprogrammer</div>
+        </div>
 
 
 
