@@ -123,6 +123,7 @@ func main() {
     }
 
     generate_blog_index(postinfo)
+    generate_about_page(postinfo)
     generate_blog_posts(postinfo)
 }
 
@@ -885,6 +886,8 @@ const INDEX_TPL=`<!DOCTYPE html>
 productive, get wonderful things
   done, and make the best use of
             our time and effort.
+
+                         <a href=/about.php>more...</a>
         </div>
 
         <div class=title>Posts</div>
@@ -918,6 +921,187 @@ func generate_blog_index(pi []PostInfo) error {
     }
 
     i,err := os.Create("index.html")
+    if err != nil {
+        return err
+    }
+    defer i.Close()
+
+    return t.Execute(i, pi)
+}
+
+/**
+[=] Generate an "about me" page
+*/
+const ABOUT_TPL=`<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>About Me: The Productive Programmer</title>
+    <meta name="description" content="Learn a bit about me">
+
+    <!-- improve view in mobile -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+@-ms-viewport{
+    width: device-width;
+    initial-scale: 1;
+}
+    </style>
+
+    <!-- favicons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="theme-color" content="#ffffff">
+
+
+    <!-- styling reset -->
+    <style>
+* { margin: 0; padding: 0; font-family: monospace; font-size: 12px; }
+    </style>
+
+    <!-- style -->
+    <style>
+.main-content { max-width: 640px; }
+@media (min-width: 768px) { * { font-size: 14px; } }
+@media (min-width: 768px) { .main-content { margin-left: 33vw; } }
+div { margin: 3em 0; }
+.main-content { margin-top: 0; }
+.home { margin-bottom: 3em; }
+.logo { max-width: 64px; text-align: right; }
+.date { margin: 0; }
+.date a { text-decoration: none; color: black; }
+.back, .back a { text-decoration: none; color: black; }
+.title { font-weight: bold; margin: 0.67em 0; }
+.file { margin: 0.67em 0 3em 0; }
+.content { white-space: pre-wrap; }
+.code { white-space: pre; font-size: 75%; color: #999; }
+.sep { white-space: pre; }
+.footer,.notify_me { font: serif; font-size: 95%; font-style: italic; }
+.mycomment input { margin: 5px 0; font: serif; font-size:95%; display: block; }
+.mycomment input[type=checkbox] { display: inline; }
+.mycomment div { margin: 5px 0; }
+.comment { max-width: 240px; }
+.comment * { font-family: serif; max-width: 240px; }
+.comment div { margin: 5px 0; }
+.comment .author { font-weight: bold; white-space: pre-wrap; }
+@media (max-width: 767px) {
+.date,.title,.file,.content,.code,.mycomment,.comments,.footer { margin-left: 8px; margin-right: 8px; }
+}
+#submit_comment { font-size: 1.2em; }
+.back,.copyright,.srcfile { margin: 0; }
+    </style>
+
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+
+</head>
+<body>
+    <div class=main-content>
+
+        <div class=title>About Me</div>
+
+        <div class=home>
+            <a href=/><img src=about-me.jpg alt='about me'></img></a><br/>
+        </div>
+
+        <div class=content>
+I am a programmer who has always
+been fascinated by systems and
+efficiency.
+
+I've always believed that the
+most precious thing we have is
+time and I truly want to make
+sure we get the most out of the
+time we have.
+
+As programmers, we spend most of
+our time - programming! So,
+naturally, I wanted to find the
+best and most productive way to
+handle programming work.
+
+I used a LOT of systems trying
+to figure this out. I've tried
+<a href=http://gettingthingsdone.com/>Getting Things Done</a>,
+<a href=https://www.franklincovey.com/execution/>Franklin-Covey's 4DX</a>, <a href=https://www.amazon.com/Eat-That-Frog-Great-Procrastinating/dp/1576754227>Eat that
+Frog</a>, <a href=http://cirillocompany.de/pages/pomodoro-technique>The Pomodoro System</a>, <a href=https://zenhabits.net/zen-to-done-ztd-the-ultimate-simple-productivity-system/>Zen
+to Done</a>, <a href=http://dontbreakthechain.com/>Don't break the chain</a>,
+<a href=https://www.tonyrobbins.com/products/productivity-performance/time-of-your-life/>Tony Robbins Time of Your Life</a>,
+<a href=https://en.todoist.com/>Todist</a>, <a href=https://www.rememberthemilk.com/>Remember the milk</a>...
+
+<img src=too-many.png></img>
+
+I'm going to be blogging about
+my experiences with all these as
+well. However I'll let you in on
+the big idea I found - most of
+these are general systems that
+apply a lot more to managers
+than developers! There are a LOT
+of really good ideas there, but
+most systems themselves are
+geared slighly more towards
+managers than producers.
+
+In this blog, I will focus on
+what I've found works for
+programmers and programming so
+if that is something you are
+also interested in - welcome!
+        </div>
+
+        <div class=sep>
+  .  .  .  .  .  .  .  .  .  .  
+        </div>
+
+        <script>
+function enable_submit() {
+    document.getElementById('submit_comment').disabled = false;
+}
+        </script>
+        <form class=mycomment method=POST>
+            <input type=hidden name=comment_on value=/about.php>
+            <input type=checkbox name=notify_me value=notify> <span class=notify_me>Keep me updated!</span>
+            <input type=text placeholder="Email(never shared)" name=email id=email>
+            <div class="g-recaptcha" data-callback="enable_submit" data-sitekey="6LcCqQwUAAAAAJK_PChDBP28CGsOPlCZ1xkR44hB"></div>
+            <input id=submit_comment disabled=disabled type=submit value="Submit">
+        </form>
+
+        <div class=sep>
+  .  .  .  .  .  .  .  .  .  .  
+        </div>
+
+        <div class=footer>
+<a href=/><img src=prodprog.png class=logo alt='logo'></img></a>
+<div class=back><a href=/>../</a></div>
+<div class=copyright>Copyright &copy; <?php echo date("Y"); ?> @productiveprogrammer</div>
+        </div>
+
+    </div>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-87972254-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>`
+func generate_about_page(pi []PostInfo) error {
+    t,err := template.New("about.html").Parse(ABOUT_TPL)
+    if err != nil {
+        return err
+    }
+
+    i,err := os.Create("about.php")
     if err != nil {
         return err
     }
