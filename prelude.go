@@ -1313,7 +1313,7 @@ if(mysqli_num_rows($result) > 0) {
     while($row = mysqli_fetch_assoc($result)) {
         $email = htmlspecialchars($row['email']);
         if (!empty($email) && strpos($email, '@')) {
-            $sp = preg_split("/[^A-z]/", $email);
+            $sp = preg_split("/[^A-Za-z]/", $email);
             $author = $sp[0];
         } else {
             $author = "Someone";
