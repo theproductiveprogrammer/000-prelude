@@ -1187,6 +1187,7 @@ div { margin: 3em 0; }
 }
 #submit_comment { font-size: 1.2em; }
 .back,.copyright,.srcfile { margin: 0; }
+.txt { white-space: pre-line; }
     </style>
 
     {{range .AddlCss}}
