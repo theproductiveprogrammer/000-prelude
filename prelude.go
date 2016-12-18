@@ -83,13 +83,11 @@ be found in [href=https://github.com/theproductiveprogrammer/000-prelude/blob/ma
 */
 
 /**
-[=] So what do we have to do?
+[ ] So what do we have to do?
 We'll take a config file with
 paths to the blog posts and use
-it to:
-(a) Generate a first/index page
-with links to
-(b) Generated blog posts
+it to load the post information
+and generate the blog.
 Simple enough? Let's begin...
 */
 package main
@@ -112,19 +110,30 @@ import (
 
 func main() {
 
-    postinfo,err := load_config()
+    postinfo,err := load_config_paths()
     if err != nil {
         log.Fatal(err);
     }
 
-    postinfo,err = set_post_info(postinfo)
+    posts,err := set_post_info(postinfo)
     if err != nil {
         log.Fatal(err);
     }
 
-    generate_blog_index(postinfo)
-    generate_about_page(postinfo)
-    generate_blog_posts(postinfo)
+    generate_blog(posts);
+}
+
+/** [=] Generate the blog
+[ ] The blog is generated simply by:
+(a) Generating an "about" page
+(a) Generating a first/index page
+with links to
+(c) Generated blog posts
+*/
+func generate_blog(posts []PostInfo) {
+    generate_about_page(posts)
+    generate_blog_index(posts)
+    generate_blog_posts(posts)
 }
 
 var LINE_MARKER string = "[\n\r]+"
@@ -174,7 +183,7 @@ type PostInfo struct {
 *     posts/learn-angular/angularstart.htm
 *     ...
 */
-func load_config() ([]PostInfo,error) {
+func load_config_paths() ([]PostInfo,error) {
     cfg, err := get_config_file()
     if err != nil {
         return nil,err
@@ -188,14 +197,14 @@ func load_config() ([]PostInfo,error) {
     for _,line := range lines {
         line = strings.TrimSpace(line)
         if len(line) > 0 {
-            r = append(r, cfg_2_postinfo(line))
+            r = append(r, cfg_post_paths(line))
         }
     }
     return r,nil
 }
 
 /**
-[=] Create a PostInfo from the
+[=] Load post paths from the
 given configuration line. This
 has one of two formats:
 
@@ -213,9 +222,9 @@ InPath and we're done
 only have two splits - the
 blog path and the asset dir.
 [ ] Walk the asset directory and
-look for additional files
+look for additional files (CSS and JS)
 */
-func cfg_2_postinfo(cfg_line string) PostInfo {
+func cfg_post_paths(cfg_line string) PostInfo {
     s := strings.Split(cfg_line, ",")
     if len(s) == 1 {
         return PostInfo{ InPath: filepath.Clean(strings.TrimSpace(cfg_line)) }
@@ -429,11 +438,11 @@ have and split appropriatly.
 */
 func split_post_content(data []byte, postinfo PostInfo) []PostContent {
 
-    cond_is_line_type_block := func(postinfo PostInfo) bool {
+    cond_is_line_type_comment := func(postinfo PostInfo) bool {
         return postinfo.pcm.start == postinfo.pcm.end
     }
 
-    if cond_is_line_type_block(postinfo) {
+    if cond_is_line_type_comment(postinfo) {
         return split_post_content_linecomments(data, postinfo)
     } else {
         return split_post_content_blockcomments(data, postinfo)
