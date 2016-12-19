@@ -110,7 +110,7 @@ import (
 
 func main() {
 
-    postinfo,err := load_config_paths()
+    postinfo,err := load_config_info()
     if err != nil {
         log.Fatal(err);
     }
@@ -168,22 +168,27 @@ type PostInfo struct {
     pcm     post_comment_marker
 
     OutPath string
+    Tags    string
     HTMLTitle   string
 }
 
 /**
 * [...]
-* The config file simply
-* contains the list of paths
-* to each blog post and
-* an optional path for
-* the blog's assets (images
-* & css).
+* The config file
+* contains
+*   1. The list of paths
+*   to each blog post
+*   2. Optional path for
+*   the blog's assets
+*   (images & css).
+*   3. Optional tags
+*
 *     posts/timemgmt/timemgmt.c, tm-assets
 *     posts/learn-angular/angularstart.htm
+*     posts/some/val.go, val-assets, (golang)
 *     ...
 */
-func load_config_paths() ([]PostInfo,error) {
+func load_config_info() ([]PostInfo,error) {
     cfg, err := get_config_file()
     if err != nil {
         return nil,err
@@ -206,10 +211,11 @@ func load_config_paths() ([]PostInfo,error) {
 /**
 [=] Load post paths from the
 given configuration line. This
-has one of two formats:
+has one of three formats:
 
   (a) just/a/blog/post.c
   (b) a/blog/post.c, with-assets/
+  (c) a/blog/post.c, with-assets/, (and tags)
 
 If assets are provided, we look
 for additional files and add
@@ -219,21 +225,31 @@ a comma.
 [ ] If we can't just set the
 InPath and we're done
 [ ] If we can, make sure we
-only have two splits - the
-blog path and the asset dir.
+only have a max of three splits -
+the blog path, the asset dir,
+and tags.
 [ ] Walk the asset directory and
 look for additional files (CSS and JS)
 */
 func cfg_post_paths(cfg_line string) PostInfo {
+    r := PostInfo{}
+
     s := strings.Split(cfg_line, ",")
     if len(s) == 1 {
         return PostInfo{ InPath: filepath.Clean(strings.TrimSpace(cfg_line)) }
     }
-    if len(s) > 2 {
+    if len(s) > 3 {
         s = []string{ strings.Join(s[:len(s)-1], ","), s[len(s)-1] }
     }
-    r := PostInfo { InPath: filepath.Clean(strings.TrimSpace(s[0])),
-                    AssetDir: filepath.Clean(strings.TrimSpace(s[1])) }
+
+    if len(s) > 1 {
+        r.InPath = filepath.Clean(strings.TrimSpace(s[0]))
+        r.AssetDir = filepath.Clean(strings.TrimSpace(s[1]))
+    }
+    if len(s) > 2 {
+        r.Tags = strings.TrimSpace(s[2])
+    }
+
     paths,err := filepath.Glob(filepath.Join(r.AssetDir, "*.css"))
     if err == nil {
         r.AddlCss = paths
@@ -907,7 +923,7 @@ productive, get wonderful things
 
         <div class=title>Posts</div>
         {{range .}}
-        <span class=post>+ <a href={{urlquery .OutPath}}>{{.HTMLTitle}}</a></span>
+        <span class=post>+ <a href={{urlquery .OutPath}}>{{.HTMLTitle}}</a> {{.Tags}} </span>
         {{end}}
 
         <div class=sep>
