@@ -338,7 +338,8 @@ underscores with spaces)
 */
 func get_post_title(postinfo PostInfo) (string,[]PostContent,error) {
     if len(postinfo.Content) > 0 && cond_is_title(postinfo.Content[0]) {
-        return postinfo.Content[0].HTMLVal,postinfo.Content[1:],nil
+        t := strings.TrimSpace(postinfo.Content[0].HTMLVal)
+        return t,postinfo.Content[1:],nil
     }
 
     return fname_to_title(filepath.Base(postinfo.InPath)),postinfo.Content,nil
