@@ -164,6 +164,7 @@ type PostInfo struct {
 
     AssetDir string
     AddlCss  []string
+    AddlJs   []string
 
     pcm     post_comment_marker
 
@@ -254,6 +255,11 @@ func cfg_post_paths(cfg_line string) PostInfo {
     if err == nil {
         r.AddlCss = paths
     }
+    paths,err = filepath.Glob(filepath.Join(r.AssetDir, "*.js"))
+    if err == nil {
+        r.AddlJs = paths
+    }
+
     return r
 }
 
@@ -1219,6 +1225,10 @@ div { margin: 3em 0; }
 .back,.copyright,.srcfile { margin: 0; }
 .txt { white-space: pre-line; }
     </style>
+
+    {{range .AddlJs}}
+    <script src="{{.}}"></script>
+    {{end}}
 
     {{range .AddlCss}}
     <link rel=stylesheet href="{{.}}"></link>
