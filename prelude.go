@@ -778,13 +778,13 @@ func replace_markup(s string, postinfo PostInfo) string {
            to: pic_replacer },
         {from: LINE_MARKER + WHITESPACE + `*([^ ]*\.gif)` + WHITESPACE + `*`,
            to: pic_replacer },
-        {from: `([ \t\n\r(;])_\*([A-Za-z0-9](.|\n|\r)*?)\*_`,
+        {from: `([ \t\n\r(;.])_\*([A-Za-z0-9](.|\n|\r)*?)\*_`,
            to: bold_italic_replacer },
-        {from: `([ \t\n\r(;])\*([A-Za-z0-9](.|\n|\r)*?)\*`,
+        {from: `([ \t\n\r(;.])\*([A-Za-z0-9](.|\n|\r)*?)\*`,
            to: bold_replacer },
-        {from: `([ \t\n\r(;])_([A-Za-z0-9](.|\n|\r)*?)_`,
+        {from: `([ \t\n\r(;.])_([A-Za-z0-9](.|\n|\r)*?)_`,
            to: italic_replacer },
-        {from: `([ \t\n\r(;])\*([_]+)([A-Za-z0-9](.|\n|\r)*?)[_]+\*`,
+        {from: `([ \t\n\r(;.])\*([_]+)([A-Za-z0-9](.|\n|\r)*?)[_]+\*`,
            to: class_replacer },
     }
 
