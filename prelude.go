@@ -784,7 +784,7 @@ func replace_markup(s string, postinfo PostInfo) string {
            to: bold_replacer },
         {from: `([ \t\n\r(;.])_([A-Za-z0-9](.|\n|\r)*?)_`,
            to: italic_replacer },
-        {from: `([ \t\n\r(;.])\*([_]+)([A-Za-z0-9](.|\n|\r)*?)[_]+\*`,
+        {from: `([ \t\n\r(;.])\*([_]+)([.A-Za-z0-9](.|\n|\r)*?)[_]+\*`,
            to: class_replacer },
     }
 
