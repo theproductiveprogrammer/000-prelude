@@ -65,7 +65,7 @@
 */
 
 /**
-    done.png [href=https://github.com/theproductiveprogrammer/000-prelude/blob/master/prelude.go]
+    done.png [href=https://gitlab.com/theproductiveprogrammer/000-prelude/blob/master/prelude.go]
 */
 
 /** [...]
@@ -79,7 +79,7 @@ happy with the way it turned
 out. What follows is the code
 that *_eats itself_* (_yum_!) to
 create this lovely page and can
-be found in [href=https://github.com/theproductiveprogrammer/000-prelude/blob/master/prelude.go](this file).
+be found in [href=https://gitlab.com/theproductiveprogrammer/000-prelude/blob/master/prelude.go](this file).
 */
 
 /**
@@ -1258,7 +1258,7 @@ div { margin: 3em 0; }
 
         <div class=file>
             <div class=back><a href=/>../</a></div>
-            <div class=srcfile>src/<a href={{github_link .InPath}}>{{html (post_fname .)}}</a></div>
+            <div class=srcfile>src/<a href={{gitlab_link .InPath}}>{{html (post_fname .)}}</a></div>
         </div>
 
         {{range .Content}}
