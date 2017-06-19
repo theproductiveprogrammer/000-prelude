@@ -1175,7 +1175,7 @@ const POST_TPL=`<!DOCTYPE html>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>The Productive Programmer</title>
+    <title>{{.HTMLTitle}} : The Productive Programmer</title>
     <meta name="description" content="The blog for programmers who are excited about being productive and want to make the best use of their time">
 
     <!-- improve view in mobile -->
