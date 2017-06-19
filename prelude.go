@@ -1216,7 +1216,7 @@ div { margin: 3em 0; }
 .title { font-weight: bold; margin: 0.67em 0; }
 .file { margin: 0.67em 0 3em 0; }
 .content { white-space: pre-wrap; }
-.code { white-space: pre; font-size: 75%; color: #999; }
+.code { white-space: pre; font-size: 85%; color: #666; }
 .sep { white-space: pre; }
 .footer,.notify_me { font: serif; font-size: 95%; font-style: italic; }
 .mycomment input { margin: 5px 0; font: serif; font-size:95%; display: block; }
