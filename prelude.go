@@ -836,6 +836,7 @@ func get_comment_marker(postinfo PostInfo) (post_comment_marker,error) {
         ".nim": { start: "##", decorate: '#', end: "##" },
         ".el": { start: ";;", decorate: ';', end: ";;" },
         ".java": { start: "/**", decorate: '*', end: "*/" },
+        ".c": { start: "/**", decorate: '*', end: "*/" },
     }
 
     ext := filepath.Ext(postinfo.InPath)
