@@ -1171,7 +1171,86 @@ func generate_blog_posts(pi []PostInfo) {
 /*
 [=] Generate a blog post
 */
-const POST_TPL=`<!DOCTYPE html>
+const POST_TPL=`<?php
+$root = $_SERVER['DOCUMENT_ROOT'];
+$config = parse_ini_file($root . '/../php-mysql-config.ini');
+$conn = mysqli_connect('localhost', $config['username'], $config['password'], $config['dbname']);
+$username="";
+if(! $conn ) {
+    die('Could not connect: ' . mysqli_connect_error());
+}
+if (isset($_COOKIE['username'])) {
+    $username = $_COOKIE['username'];
+}
+
+if ((isset($_POST['comment']) && !empty($_POST['comment'])) || ((isset($_POST['email']) && !empty($_POST['email'])))) {
+
+    if(isset($_POST['g-recaptcha-response']) && !empty($_POST['g-recaptcha-response'])) {
+
+        $secret = "6LcCqQwUAAAAAG_Cdcmk_BeSCCttVIpelXCzN6QJ";
+        $recaptcha = $_POST['g-recaptcha-response'];
+
+        $url = 'https://www.google.com/recaptcha/api/siteverify';
+        $data = 'secret=' . $secret . '&response=' . $recaptcha;
+
+        $ch = curl_init( $url );
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt( $ch, CURLOPT_POST, 1);
+        curl_setopt( $ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt( $ch, CURLOPT_HEADER, 0);
+        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1);
+
+        $verifyResponse = curl_exec( $ch );
+
+        $responseData = json_decode($verifyResponse);
+        if ($responseData->success) {
+
+            $notify_me = mysqli_real_escape_string($conn, $_POST['notify_me']);
+            if ($notify_me == "notify") {
+                $inlist = 1;
+            } else {
+                $inlist = 0;
+            }
+            $comment_on = mysqli_real_escape_string($conn, $_POST['comment_on']);
+            $comment = mysqli_real_escape_string($conn, $_POST['comment']);
+            $username = $_POST['email'];
+            $email = mysqli_real_escape_string($conn, $_POST['email']);
+
+            $addr   = mysqli_real_escape_string($conn, $_SERVER['REMOTE_ADDR']);
+            $port   = mysqli_real_escape_string($conn, $_SERVER['REMOTE_PORT']);
+            $method = mysqli_real_escape_string($conn, $_SERVER['REQUEST_METHOD']);
+            $url    = mysqli_real_escape_string($conn, $_SERVER['REQUEST_URI']);
+
+            $client_ip       = isset($_SERVER['HTTP_CLIENT_IP'])       ? mysqli_real_escape_string($conn, $_SERVER['HTTP_CLIENT_IP']) : '';
+            $x_forwarded_for = isset($_SERVER['HTTP_X_FORWARDED_FOR']) ? mysqli_real_escape_string($conn, $_SERVER['HTTP_X_FORWARDED_FOR']) : '';
+            $ua              = isset($_SERVER['HTTP_USER_AGENT'])      ? mysqli_real_escape_string($conn, $_SERVER['HTTP_USER_AGENT']) : '';
+            $referer         = isset($_SERVER['HTTP_REFERER'])         ? mysqli_real_escape_string($conn, $_SERVER['HTTP_REFERER']) : '';
+            $sz              = isset($_SERVER['CONTENT_LENGTH'])       ? mysqli_real_escape_string($conn, $_SERVER['CONTENT_LENGTH']) : '';
+
+            if (isset($username)) {
+                $server_name = $_SERVER['SERVER_NAME'];
+                if(0 === strpos($server_name, "www.")) {
+                    $server_name = substr($server_name, 3);
+                }
+                setcookie('username', $username, time()+60*60*24*365, '/', $server_name);
+            }
+
+            $sql = "insert into comments (inlist,live,confirmed,comment_on,comment,email,at,addr,client_ip,x_forwarded_for,port,ua,referer) VALUES('$inlist','1','0','$comment_on','$comment','$email',NOW(),'$addr','$client_ip','$x_forwarded_for','$port','$ua','$referer')";
+
+            $retval = mysqli_query($conn, $sql);
+            if (!$retval) {
+                error_log(mysqli_error($conn));
+                mysqli_close($conn);
+                die("Uh...oh! Something went wrong!");
+            }
+
+        }
+    }
+}
+
+?>
+<!DOCTYPE html>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -1278,7 +1357,7 @@ function enable_submit() {
         <form class=mycomment method=POST>
             <input type=hidden name=comment_on value="{{urlquery .OutPath}}">
             <input type=checkbox name=notify_me value=notify> <span class=notify_me>Notify me on new blog posts</span>
-            <input type=text placeholder="Email(never shared)" name=email id=email>
+            <input type=text placeholder="Email(never shared)" name=email id=email value="<?php echo $username?>">
             <textarea placeholder="Comment" name=comment cols=24 rows=8></textarea><br/>
             <div class="g-recaptcha" data-callback="enable_submit" data-sitekey="6LcCqQwUAAAAAJK_PChDBP28CGsOPlCZ1xkR44hB"></div>
             <input id=submit_comment disabled=disabled type=submit value="Submit">
@@ -1289,70 +1368,6 @@ function enable_submit() {
         </div>
 
 <?php
-$root = $_SERVER['DOCUMENT_ROOT'];
-$config = parse_ini_file($root . '/../php-mysql-config.ini');
-$conn = mysqli_connect('localhost', $config['username'], $config['password'], $config['dbname']);
-if(! $conn ) {
-    die('Could not connect: ' . mysqli_connect_error());
-}
-
-if ((isset($_POST['comment']) && !empty($_POST['comment'])) || ((isset($_POST['email']) && !empty($_POST['email'])))) {
-
-    if(isset($_POST['g-recaptcha-response']) && !empty($_POST['g-recaptcha-response'])) {
-
-        $secret = "6LcCqQwUAAAAAG_Cdcmk_BeSCCttVIpelXCzN6QJ";
-        $recaptcha = $_POST['g-recaptcha-response'];
-
-        $url = 'https://www.google.com/recaptcha/api/siteverify';
-        $data = 'secret=' . $secret . '&response=' . $recaptcha;
-
-        $ch = curl_init( $url );
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt( $ch, CURLOPT_POST, 1);
-        curl_setopt( $ch, CURLOPT_POSTFIELDS, $data);
-        curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt( $ch, CURLOPT_HEADER, 0);
-        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1);
-
-        $verifyResponse = curl_exec( $ch );
-
-        $responseData = json_decode($verifyResponse);
-        if ($responseData->success) {
-
-            $notify_me = mysqli_real_escape_string($conn, $_POST['notify_me']);
-            if ($notify_me == "notify") {
-                $inlist = 1;
-            } else {
-                $inlist = 0;
-            }
-            $comment_on = mysqli_real_escape_string($conn, $_POST['comment_on']);
-            $comment = mysqli_real_escape_string($conn, $_POST['comment']);
-            $email = mysqli_real_escape_string($conn, $_POST['email']);
-
-            $addr   = mysqli_real_escape_string($conn, $_SERVER['REMOTE_ADDR']);
-            $port   = mysqli_real_escape_string($conn, $_SERVER['REMOTE_PORT']);
-            $method = mysqli_real_escape_string($conn, $_SERVER['REQUEST_METHOD']);
-            $url    = mysqli_real_escape_string($conn, $_SERVER['REQUEST_URI']);
-
-            $client_ip       = isset($_SERVER['HTTP_CLIENT_IP'])       ? mysqli_real_escape_string($conn, $_SERVER['HTTP_CLIENT_IP']) : '';
-            $x_forwarded_for = isset($_SERVER['HTTP_X_FORWARDED_FOR']) ? mysqli_real_escape_string($conn, $_SERVER['HTTP_X_FORWARDED_FOR']) : '';
-            $ua              = isset($_SERVER['HTTP_USER_AGENT'])      ? mysqli_real_escape_string($conn, $_SERVER['HTTP_USER_AGENT']) : '';
-            $referer         = isset($_SERVER['HTTP_REFERER'])         ? mysqli_real_escape_string($conn, $_SERVER['HTTP_REFERER']) : '';
-            $sz              = isset($_SERVER['CONTENT_LENGTH'])       ? mysqli_real_escape_string($conn, $_SERVER['CONTENT_LENGTH']) : '';
-
-            $sql = "insert into comments (inlist,live,confirmed,comment_on,comment,email,at,addr,client_ip,x_forwarded_for,port,ua,referer) VALUES('$inlist','1','0','$comment_on','$comment','$email',NOW(),'$addr','$client_ip','$x_forwarded_for','$port','$ua','$referer')";
-
-            $retval = mysqli_query($conn, $sql);
-            if (!$retval) {
-                error_log(mysqli_error($conn));
-                mysqli_close($conn);
-                die("Uh...oh! Something went wrong!");
-            }
-
-        }
-    }
-}
-
 $sql = "select * from comments where TRIM(IFNULL(comment, '')) > '' and comment_on='{{urlquery .OutPath}}' and live=1 order by 'at' desc";
 $result = mysqli_query($conn, $sql);
 if(mysqli_num_rows($result) > 0) {
